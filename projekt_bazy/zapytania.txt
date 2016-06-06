@@ -1,0 +1,237 @@
+--tabele na ca≥e pliki
+create table GUS_STATS(ID VARCHAR(20) NOT NULL, CONTENT XML);
+select * from GUS_STATS;
+
+--wykonaÊ przez konsolÍ db2
+--C:\Program Files\IBM\SQLLIB\BIN>db2 select * from gus_stats
+--C:\Program Files\IBM\SQLLIB\BIN>db2 UPDATE DB CFG FOR proj USING logarchmeth1 OFF logarchmeth2 OFF logprimary 50 logsecond 8 logfilsiz 4096
+--C:\Program Files\IBM\SQLLIB\BIN>db2stop force
+--C:\Program Files\IBM\SQLLIB\BIN>db2start
+--C:\Program Files\IBM\SQLLIB\BIN>db2 connect to proj
+--C:\Program Files\IBM\SQLLIB\BIN>db2 IMPORT from C:\GusStatsXML\ALL.del of del xml from C:\GusStatsXML insert into GUS_STATS(ID, CONTENT)
+
+--tabela na plik terc
+drop table TERC;
+create table TERC(
+ID integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+WOJ  VARCHAR(9),
+POW  VARCHAR(9),
+GMI  VARCHAR(9),
+RODZ  VARCHAR(9),
+NAZWA VARCHAR(128),
+NAZDOD VARCHAR(128));
+select * from TERC;
+--podzielenie danych XML terc.xml na analogiczny SQL
+insert into TERC (WOJ, POW, GMI, RODZ, NAZWA, NAZDOD)
+select X.* from (select * from GUS_STATS where ID = 'TERC') xmlp , XMLTABLE('$T/teryt/catalog/row' PASSING xmlp.CONTENT AS "T" COLUMNS
+WOJ VARCHAR(9) PATH 'col[1]',
+POW VARCHAR(9) PATH 'col[2]',
+GMI VARCHAR(9) PATH 'col[3]',
+RODZ VARCHAR(9) PATH 'col[4]',
+NAZWA VARCHAR(128) PATH 'col[5]',
+NAZDOD VARCHAR(128) PATH 'col[6]'
+)AS X;
+
+
+--tabela na plik ulic
+drop table ULIC;
+create table ULIC(
+ID integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+WOJ  VARCHAR(4),
+POW  VARCHAR(4),WMRODZ
+RODZ_GMI  VARCHAR(4),
+SYM  VARCHAR(10),
+SYM_UL  VARCHAR(10),
+CECHA  VARCHAR(128),
+NAZWA_1  VARCHAR(128),
+NAZWA_2  VARCHAR(128));
+select * from ULIC;
+--podzielenie danych XML ulic.xml na analogiczny SQL
+insert into ULIC (WOJ, POW, GMI, RODZ_GMI, SYM, SYM_UL, CECHA, NAZWA_1, NAZWA_2)
+select X.* from (select * from GUS_STATS where ID = 'ULIC') xmlp , XMLTABLE('$T/teryt/catalog/row' PASSING xmlp.CONTENT AS "T" COLUMNS
+WOJ VARCHAR(4) PATH 'col[1]',
+POW VARCHAR(4) PATH 'col[2]',
+GMI VARCHAR(4) PATH 'col[3]',
+RODZ_GMI VARCHAR(4) PATH 'col[4]',
+SYM VARCHAR(10) PATH 'col[5]',
+SYM_UL VARCHAR(10) PATH 'col[6]',
+CECHA VARCHAR(128) PATH 'col[7]',
+NAZWA_1 VARCHAR(128) PATH 'col[8]',
+NAZWA_2 VARCHAR(128) PATH 'col[9]'
+)AS X;
+select * from ULIC;
+
+
+--tabela na plik WMRODZ
+drop table WMRODZ;
+create table WMRODZ(
+ID integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+RM  VARCHAR(4),
+NAZWA_RM  VARCHAR(128));
+select * from WMRODZ;
+--podzielenie danych XML WMRODZ.xml na analogiczny SQL
+insert into WMRODZ (RM, NAZWA_RM)
+select X.* from (select * from GUS_STATS where ID = 'WMRODZ') xmlp , XMLTABLE('$T/teryt/catalog/row' PASSING xmlp.CONTENT AS "T" COLUMNS
+RM VARCHAR(4) PATH 'col[1]',
+NAZWA_RM VARCHAR(128) PATH 'col[2]')AS X;
+select * from WMRODZ;
+
+
+--tabela na plik SIMC
+drop table SIMC;
+create table SIMC(
+ID integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+WOJ  VARCHAR(4),
+POW  VARCHAR(4),
+GMI  VARCHAR(4),
+RODZ_GMI  VARCHAR(4),
+RM  VARCHAR(4),
+MZ  VARCHAR(4),
+NAZWA  VARCHAR(128),
+SYM  VARCHAR(10),
+SYMPOD  VARCHAR(10));
+select * from WMRODZ;
+--podzielenie danych XML SIMC.xml na analogiczny SQL
+insert into SIMC (WOJ, POW, GMI, RODZ_GMI, RM, MZ, NAZWA, SYM, SYMPOD)
+select X.* from (select * from GUS_STATS where ID = 'SIMC') xmlp , XMLTABLE('$T/teryt/catalog/row' PASSING xmlp.CONTENT AS "T" COLUMNS
+WOJ  VARCHAR(4) PATH 'col[1]',
+POW  VARCHAR(4) PATH 'col[2]',
+GMI  VARCHAR(4) PATH 'col[3]',
+RODZ_GMI  VARCHAR(4) PATH 'col[4]',
+RM  VARCHAR(4) PATH 'col[5]',
+MZ  VARCHAR(4) PATH 'col[6]',
+NAZWA  VARCHAR(128) PATH 'col[7]',
+SYM  VARCHAR(10) PATH 'col[8]',
+SYMPOD  VARCHAR(10) PATH 'col[9]')AS X;
+select * from SIMC;
+
+--------------------MOJA STRUKTURA
+drop table WOJEW;
+create table WOJEW(WOJ int not null unique, NAZWA  VARCHAR(128));
+insert into WOJEW (WOJ, NAZWA)select WOJ, NAZWA from TERC where NAZDOD = 'wojewÛdztwo';
+select * from WOJEW;
+
+drop table POWIAT;
+create table POWIAT(POW int not null, WOJ int not null, NAZWA VARCHAR(128));
+insert into POWIAT (POW, WOJ, NAZWA)select POW, WOJ, NAZWA from TERC where NAZDOD = 'powiat';
+select * from POWIAT;
+
+drop table MIASTO_POWIAT;
+create table MIASTO_POWIAT(POW int not null, WOJ int not null, NAZWA VARCHAR(128));
+insert into MIASTO_POWIAT (POW, WOJ, NAZWA)select POW, WOJ, NAZWA from TERC where NAZDOD LIKE '%na prawach powiatu';
+select * from MIASTO_POWIAT;
+
+drop table GMINY;
+create table GMINY(GMI int not null, WOJ int not null, POW int, RODZ int, NAZWA VARCHAR(128), NAZDOD VARCHAR(128));
+insert into GMINY (GMI, WOJ, POW, RODZ, NAZWA, NAZDOD)select GMI, WOJ, POW, RODZ, NAZWA, NAZDOD from TERC where NAZDOD LIKE 'gmina%';
+select * from GMINY;
+
+drop table MIASTA;
+create table MIASTA(WOJ int not null, POW int not null, GMI int not null, RODZ int, NAZWA VARCHAR(128), NAZDOD VARCHAR(128));
+insert into MIASTA (WOJ, POW, GMI, RODZ, NAZWA, NAZDOD)select WOJ, POW, GMI, RODZ, NAZWA, NAZDOD from TERC where NAZDOD = 'miasto';
+select * from MIASTA;
+
+drop table ULICE;
+create table ULICE(WOJ int not null, POW int not null, GMI int not null, RODZ_GMI int not null, SUM int, SYM_UL int, CECHA VARCHAR(128), NAZWA_1 VARCHAR(128), NAZWA_2 VARCHAR(128));
+insert into ULICE (WOJ, POW, GMI, RODZ_GMI, SYM_UL, CECHA, NAZWA_1, NAZWA_2)select WOJ, POW, GMI, RODZ_GMI, SYM_UL, CECHA, NAZWA_1, NAZWA_2 from ULIC;
+select * from ULICE;
+
+
+drop table RODZAJ;
+create table RODZAJ(RM int not null, NAZWA_RM VARCHAR(128), PRIMARY KEY(RM));
+insert into RODZAJ (RM, NAZWA_RM)select RM, NAZWA_RM from WMRODZ;
+select * from RODZAJ;
+
+drop table MIEJSCOWOSC;
+create table MIEJSCOWOSC(WOJ int not null, POW int, GMI int, RODZ_GMI int, RM int, MZ int, NAZWA VARCHAR(128), SYM int, SYMPOD int);
+insert into MIEJSCOWOSC (WOJ, POW, GMI, RODZ_GMI, RM, MZ, NAZWA, SYM, SYMPOD)select WOJ, POW, GMI, RODZ_GMI, RM, MZ, NAZWA, SYM, SYMPOD from SIMC;
+
+--wynik w postaci xml do bazy
+create table XMLRESULT(ID integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1), CONTENT xml);
+insert into xmlresult(content)SELECT XMLGROUP(
+   nazwa AS "nazwa", nazdod AS "typ"
+   ORDER BY nazwa OPTION ROW "gmina" ROOT "GMINY") 
+from miasta where pow = (select pow from POWIAT where nazwa='≥Ûdzki wschodni') and woj = (select woj from WOJEW where nazwa = '£”DZKIE');
+
+
+
+
+CREATE OR REPLACE VIEW  ULICE_VIEW AS
+select CECHA, CONCAT(CONCAT(NAZWA_1,' '),NAZWA_2) as Nazwa_Cala, NAZWA_1 as Nazwa, NAZWA_2 as Nazwa_Cd, g.Nazwa as Gmina, w.NAZWA as Wojew, p.NAZWA as Powiat, mp.NAZWA as Miasto_Powiatowe from ulice as u 
+left join WOJEW as w on u.woj = w.woj
+left join POWIAT as p on u.pow = p.pow and u.woj = p.woj
+left join MIASTO_POWIAT as mp on u.pow = mp.pow and u.woj = mp.woj
+left join GMINY as g on u.pow = g.pow and u.woj = g.woj and u.GMI = g.GMI;
+where NAZWA_1 = 'Kolberga';
+
+
+
+
+CREATE OR REPLACE VIEW  MIEJSCOWOSCI_VIEW AS
+select m.NAZWA, ro.NAZWA_RM as Rodzaj, g.Nazwa as Gmina, w.NAZWA as Wojew, p.NAZWA as Powiat, mp.NAZWA as Miasto_Powiatowe from miejscowosc as m
+left join WOJEW as w on m.woj = w.woj
+left join POWIAT as p on m.pow = p.pow and m.woj = p.woj
+left join MIASTO_POWIAT as mp on m.pow = mp.pow and m.woj = mp.woj
+left join GMINY as g on m.pow = g.pow and m.woj = g.woj and m.GMI = g.GMI
+left join RODZAJ as ro on m.rm = ro.RM;
+
+
+
+
+
+select * from MIEJSCOWOSCI_VIEW where NAZWA = '£Ûdü';
+select * from MIEJSCOWOSCI_VIEW where miasto_powiatowe = '£Ûdü' and rodzaj != 'miasto';
+select * from ULICE_VIEW where miasto_powiatowe = '£Ûdü';
+select * from ULICE_VIEW where gmina = 'Wierzbica' and WOJEW = 'MAZOWIECKIE';
+select m.nazwa, r.nazwa_rm from MIEJSCOWOSC as m left join RODZAJ as r on m.RM = R.rm;
+--select POW, WOJ, NAZWA from TERC where NAZDOD LIKE '%na prawach powiatu';
+--select * from miasta where pow = (select pow from POWIAT where nazwa='≥Ûdzki wschodni') and woj = (select woj from WOJEW where nazwa = '£”DZKIE');
+--select * from GMINY where pow = (select pow from POWIAT where nazwa='≥Ûdzki wschodni') and woj = (select woj from WOJEW where nazwa = '£”DZKIE');
+
+
+--pobieranie w postaci xml
+insert into xmlresult(content)
+SELECT XMLGROUP(
+   nazwa AS "nazwa_cala", cecha AS "typ", wojew as "Wojewodztwo"
+   ORDER BY nazwa OPTION ROW "ulica" ROOT "ulice_lodzi") 
+from ULICE_VIEW where miasto_powiatowe = '£Ûdü';
+
+insert into xmlresult(content)
+SELECT XMLGROUP(
+   nazwa AS "nazwa", rodzaj AS "rodzaj", wojew 
+   ORDER BY nazwa OPTION ROW "czesc" ROOT "lodz") 
+from MIEJSCOWOSCI_VIEW where miasto_powiatowe = '£Ûdü' and rodzaj != 'miasto';
+
+insert into xmlresult(content)
+SELECT XMLGROUP(
+   wojew AS "Wojewodztwo", 2 AS "Ilosc", 3 as "Nazwa_ulicy"
+   ORDER BY 2 OPTION ROW "WOJEWODZTWA" ROOT "ulica_polna") 
+from (select wojew, count(nazwa) as "ilosc", 'polna' as "nazwa_ulicy" from ULICE_VIEW where nazwa_cala = 'Polna' group by wojew order by count(nazwa)  desc) as ss;
+
+select * from XMLRESULT order by ID desc limit 1;
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------
+------------------------------------------
+--inne zapytania
+select xmlelement (name "gmina", 
+					xmlelement (name "nazwa", nazwa), 
+					xmlelement (name "typ", nazdod)) OPTION ROOT "document"
+from miasta where pow = (select pow from POWIAT where nazwa='≥Ûdzki wschodni') and woj = (select woj from WOJEW where nazwa = '£”DZKIE');
+
+
+SELECT XMLGROUP(
+   nazwa AS "nazwa", nazdod AS "typ"
+   ORDER BY nazwa OPTION ROW "gmina" ROOT "GMINY") 
+from miasta where pow = (select pow from POWIAT where nazwa='≥Ûdzki wschodni') and woj = (select woj from WOJEW where nazwa = '£”DZKIE');
+
+

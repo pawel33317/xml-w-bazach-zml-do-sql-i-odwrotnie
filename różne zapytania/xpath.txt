@@ -1,0 +1,79 @@
+Plik do æwiczeñ z dalsz¹ czêœci¹ zadañ
+--------------------------------------------------------------------
+Mamy plik XML:
+<?xml version="1.0" encoding="UTF-8"?>
+<bookstore>
+	<book>
+		<title lang="eng">Harry Potter</title>
+		<price>29.99</price>
+		<currency>euro</currency>
+	</book>
+	<book>
+		<title lang="eng">Learning XML</title>
+		<price>39.95</price>
+		<currency>dollar</currency>
+	</book>
+	<book>
+		<title lang="pl">Harry Potter</title>
+		<price>35.05</price>
+		<currency>zloty</currency>
+	</book>
+	<book>
+		<title lang="pl">Learning XML</title>
+		<price>44.50</price>
+		<currency>pound</currency>
+	</book>
+</bookstore> 
+
+4. ZnajdŸ tytu³y wszystkich ksi¹¿ek
+/bookstore/book/title
+5. ZnajdŸ wszystkie atrybuty lang od elementu <book> w pliku
+/bookstore/book/*/@lang
+6. ZnajdŸ nazwy wszystkich atrybutów w pliku
+//@*
+7. Znajdujemy siê w strukturze w miejscu /bookstore/book/title. Chcemy przejœæ do miejsca / (root)
+/bookstore/book/title/../../../*
+8. Znajdujemy drugi element <book>
+/bookstore/book[2]
+9. Znajdujemy pierwsze dwie pozycje ksi¹¿kowe
+/bookstore/book[position() < 3]
+10. Znajdujemy od pozycji 2 do 3 dwie pozycje ksi¹¿kowe
+/bookstore/book[position() >1 and position() < 4]
+11. Znajdujemy przedostatni¹ pozycjê
+/bookstore/book[last()-1]
+12. Znajdujemy pierwsz¹ i ostatni¹ pozycjê <book>
+/bookstore/book[position() = 1 or position()=  last()]
+13.Wszystkie oprócz drugiej pozycji <book>
+/bookstore/book[position() != 1]
+14. ZnajdŸ wszystkie elementy o wartoœci atrybutu lang='eng' w title
+/bookstore/book/title[@lang='eng']
+15. ZnajdŸ elementy o atrybucie lang i wartoœci "eng" w ca³ym pliku
+//*[@lang='eng']
+16. ZnajdŸ ca³e znaczniki elementów o dowolnym atrybucie o wartoœci "eng"
+/bookstore/book/title[@lang = 'eng']/..		/bookstore/book/title[@lang]/..
+17. ZnajdŸ ca³e znaczniki elementów o dowolnym atrybucie o dowolnych wartoœciach
+/bookstore/book/title[@*]/..
+18. ZnajdŸ wartoœci elementów, które zawieraj¹ jakikolwiek atrybut
+/bookstore/book/title[@*]/@*
+19. Podaj elementy <book>, których cena jest >35
+/bookstore/book[price > 35]
+20. Podaj nazwy ksi¹¿ek, których cena jest >35
+
+21. Podaj nazwy ksi¹¿ek, których cena jest w przedziale miêdzy 25 i 35.
+
+22. Podaj nazwy ksi¹¿ek, których cena nie jest w przedziale miêdzy 25 i 40.
+
+23. Podaj nazwy ksi¹¿ek, których cena jest >35 i element <currency> ma wartoœæ dollar
+
+24. Podaj tytu³y wszystkich ksi¹¿ek na 3 poziomie
+
+25. Podaj wszystkie tytu³y i ceny
+
+26. Podaj wszystkie wêz³y book 
+
+27. Podaj wszystkie atrybuty lang
+
+28. Szukam przodków o nazie book zaczynaj¹c od /bookstore/book/title
+
+29. Szukam potomków o nazwie title, book, price
+

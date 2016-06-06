@@ -1,0 +1,1 @@
+XML w bazach danych, zapytania xquery, xpath, flowr oraz projekt przerzucanie bazy sql na xml i odwrotnie

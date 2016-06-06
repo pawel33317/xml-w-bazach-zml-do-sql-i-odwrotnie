@@ -1,0 +1,84 @@
+bin> db2sampl -name XML -sql -xml
+db2ilsit
+
+
+====
+
+
+select * from customer;
+
+xquery db2-fn:xmlcolumn('DB2ADMIN.CUSTOMER.INFO');
+
+xquery db2-fn:sqlquery('select info from customer where cid = 1003');
+
+xquery db2-fn:xmlcolumn('DB2ADMIN.CUSTOMER.INFO')/customerinfo/name;  
+
+xquery db2-fn:xmlcolumn('DB2ADMIN.CUSTOMER.INFO')/customerinfo[1]/name/text();
+
+xquery db2-fn:xmlcolumn('DB2ADMIN.CUSTOMER.INFO')/customerinfo/addr[city='Toronto']/../name;
+
+xquery db2-fn:xmlcolumn('DB2ADMIN.CUSTOMER.INFO')/customerinfo/addr[city='Toronto']/../name/text();
+
+
+xquery db2-fn:xmlcolumn('DB2ADMIN.CUSTOMER.INFO')/customerinfo[addr/city='Toronto']/name/text();
+
+select * from product;
+
+xquery db2-fn:xmlcolumn('PRODUCT.DESCRIPTION')/product/description[price<100]/price;
+
+xquery fn:count(db2-fn:xmlcolumn('PRODUCT.DESCRIPTION')/product/description[price<100]/price);
+
+
+xquery fn:min(db2-fn:xmlcolumn('PRODUCT.DESCRIPTION')/product/description[price<100]/price);
+
+xquery fn:max(db2-fn:xmlcolumn('PRODUCT.DESCRIPTION')/product/description[price<100]/price);
+
+
+
+xquery <CostlyProducts> { db2-fn:xmlcolumn('DB2ADMIN.CUSTOMER.INFO')/customerinfo[addr/city='Toronto']/name} </CostlyProducts>
+
+
+
+
+xquery <CostlyProducts> { db2-fn:xmlcolumn('PRODUCT.DESCRIPTION')/product/description[price<100]/name} 
+</CostlyProducts> ??
+
+
+xquery for $zmienna in db2-fn:xmlcolumn('DB2ADMIN.CUSTOMER.INFO')/customerinfo
+	return $zmienna/name;
+
+=== xquery db2-fn:xmlcolumn('CUSTOMER.INFO')/customerinfo/name;
+
+
+xquery for $zmienna in db2-fn:xmlcolumn('DB2ADMIN.CUSTOMER.INFO')/customerinfo/name
+	order by $zmienna descending
+	return $zmienna;
+
+
+
+
+<product pid="100-100-01">
+	<description>
+		<name>Snow Shovel, Basic 22 inch</name>
+		<details>Basic Snow Shovel, 22 inches wide, straight handle with
+			D-Grip</details>
+		<price>9.99</price>
+		<weight>1 kg</weight>
+	</description>
+</product>
+
+
+
+<customerinfo Cid="1003">
+	<name>Robert Shoemaker</name>
+	<addr country="Canada">
+		<street>1596 Baseline</street>
+		<city>Aurora</city>
+		<prov-state>Ontario</prov-state>
+		<pcode-zip>N8X 7F8</pcode-zip>
+	</addr>
+	<phone type="work">905-555-7258</phone>
+	<phone type="home">416-555-2937</phone>
+	<phone type="cell">905-555-8743</phone>
+	<phone type="cottage">613-555-3278</phone>
+</customerinfo>
